@@ -9,6 +9,19 @@ class Bing(SearchEngine):
         self._base_url = u'https://www.bing.com'
         self.set_headers({'User-Agent':FAKE_USER_AGENT})
 
+    # new
+        
+    def _selectors_ads(self, element):
+        '''Returns the appropriate CSS selector for ad results.'''
+        selectors = {
+            'url': '.sb_add .b_adurl cite', 
+            'title': '.sb_add h2',
+            'text': '.sb_add .b_ad_description', 
+            'links': '.sb_add', 
+            'next': 'div#b_content nav[role="navigation"] a.sb_pagN'
+        }
+        return selectors[element]
+
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
         selectors = {

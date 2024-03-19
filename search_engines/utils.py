@@ -19,8 +19,22 @@ def is_url(link):
     parts = requests.utils.urlparse(link)
     return bool(parts.scheme and parts.netloc)
 
+# old
+# def domain(url):
+#     '''Returns domain form URL'''
+#     host = requests.utils.urlparse(url).netloc
+#     return host.lower().split(':')[0].replace('www.', '')
+
+# new
+def add_https(url):
+    """Make sure url contains 'https://' to apply netloc."""
+    if not url.startswith('https://'):
+        url = 'https://' + url
+    return url
+
 def domain(url):
     '''Returns domain form URL'''
+    url = add_https(url)
     host = requests.utils.urlparse(url).netloc
     return host.lower().split(':')[0].replace('www.', '')
 

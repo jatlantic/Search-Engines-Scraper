@@ -19,6 +19,11 @@ class SearchResults(object):
         '''Returns the domains found in search results'''
         return [row.get('host') for row in self._results]
     
+    # new 
+    def types(self):
+        '''Returns the organic and ads order found in search results'''
+        return [row.get('type') for row in self._results]
+    
     def results(self):
         '''Returns all data found in search results'''
         return self._results

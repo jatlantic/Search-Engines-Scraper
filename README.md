@@ -1,5 +1,6 @@
 # search_engines  
-A Python library that queries Google, Bing, Yahoo and other search engines and collects the results from multiple search engine results pages.  
+A Python library that queries Google, Bing, Yahoo and other search engines and collects the results from multiple search engine results pages.
+This versions of *search-engines* has been adapted to capture advertisement urls for the Bing search.
 Please note that web-scraping may be against the TOS of some search engines, and may result in a temporary ban.
 
 ## Supported search engines  
@@ -55,6 +56,17 @@ As a CLI script:
 ```  
 $ python search_engines_cli.py -e google,bing -q "my query" -o json,print
 ```
+
+To use the advertisement capture for Bing:
+
+```
+from search_engines import Bing
+engine = Bing()
+results = engine.search(query, pages=2)
+links = results.links()
+typ = results.types()
+```
+
 
 ## Other versions  
 

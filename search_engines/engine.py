@@ -31,6 +31,11 @@ class SearchEngine(object):
         self.is_banned = False
         '''Indicates if a ban occured'''
 
+    # new
+    def _selectors_ads(self, element):
+        '''Returns the appropriate CSS selector for ads.'''
+        raise NotImplementedError()
+    
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
         raise NotImplementedError()
@@ -84,11 +89,42 @@ class SearchEngine(object):
         '''Checks if query is contained in the item.'''
         return self._query.lower() in item.lower()
     
+    # old
+    # def _filter_results(self, soup):
+    #     '''Processes and filters the search results.''' 
+    #     tags = soup.select(self._selectors('links'))
+    #     results = [self._item(l) for l in tags]
+
+    #     if u'url' in self._filters:
+    #         results = [l for l in results if self._query_in(l['link'])]
+    #     if u'title' in self._filters:
+    #         results = [l for l in results if self._query_in(l['title'])]
+    #     if u'text' in self._filters:
+    #         results = [l for l in results if self._query_in(l['text'])]
+    #     if u'host' in self._filters:
+    #         results = [l for l in results if self._query_in(utils.domain(l['link']))]
+    #     return results
+
+    # new
     def _filter_results(self, soup):
-        '''Processes and filters the search results.''' 
+        '''Processes and filters the search results.'''
+        # gather ad results
+        if self._base_url == 'https://www.bing.com':
+            # new selector used here
+            tags = soup.select(self._selectors_ads('links'))
+            results_ads = [self._item(l) for l in tags]
+            if u'url' in self._filters:
+                results_ads = [l for l in results_ads if self._query_in(l['link'])]
+            if u'title' in self._filters:
+                results_ads = [l for l in results_ads if self._query_in(l['title'])]
+            if u'text' in self._filters:
+                results_ads = [l for l in results_ads if self._query_in(l['text'])]
+            if u'host' in self._filters:
+                results_ads = [l for l in results_ads if self._query_in(utils.domain(l['link']))]
+
+        # gather organic results
         tags = soup.select(self._selectors('links'))
         results = [self._item(l) for l in tags]
-
         if u'url' in self._filters:
             results = [l for l in results if self._query_in(l['link'])]
         if u'title' in self._filters:
@@ -97,10 +133,15 @@ class SearchEngine(object):
             results = [l for l in results if self._query_in(l['text'])]
         if u'host' in self._filters:
             results = [l for l in results if self._query_in(utils.domain(l['link']))]
-        return results
+        # collect new variable to distinguish ad vs organic results
+        for dictionary in results:
+            dictionary['type'] = 'organic'
+        for dictionary in results_ads:
+            dictionary['type'] = 'ad'
+        return results_ads+results
     
     def _collect_results(self, items):
-        '''Colects the search results items.''' 
+        '''Collects the search results items.''' 
         for item in items:
             if not utils.is_url(item['link']):
                 continue
@@ -168,6 +209,7 @@ class SearchEngine(object):
                     break
                 tags = BeautifulSoup(response.html, "html.parser")
                 items = self._filter_results(tags)
+                #print('items', items)
                 self._collect_results(items)
                 
                 msg = 'page: {:<8} links: {}'.format(page, len(self.results))
